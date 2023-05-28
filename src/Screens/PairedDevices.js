@@ -11,7 +11,7 @@ import {
   Modal,
   BlurView,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
 import LinearGradient from 'react-native-linear-gradient';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -27,6 +27,9 @@ import axios from 'axios';
 import Slider from '@react-native-community/slider';
 import isTokenExpired from '../Helper/isTokenExpired';
 import Wave from 'react-native-waveview';
+import conversion from '../Helper/conversion';
+import {AuthContext} from '../Helper/context/AuthContext';
+import {AxiosContext} from '../Helper/context/AxiosContext';
 
 const PairedDevices = ({route}) => {
   // const [value, setValue] = useState(0.6);
@@ -40,76 +43,34 @@ const PairedDevices = ({route}) => {
   const [aquaTopperKit, setAquaTopperKit] = useState([]);
   const [aquaOpenConditionValue, setAquaOpenConditionValue] = useState([]);
   const [aquaCloseConditionValue, setCloseConditionValue] = useState([]);
-  const [newToken, setNewToken] = useState();
+
+  const axiosContext = useContext(AxiosContext);
+  const authContext = useContext(AuthContext);
 
   const getAquaDevice = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    const token = JSON.parse(user).JwtToken;
-
-    isTokenExpired(token);
     setIsLoading(true);
     try {
-      const aquaDevice = await fetch(`${AQUATOOPER_BASE_URL}/${id}`, {
-        method: 'GET',
-        headers: {
-          Authorization: !isTokenExpired(token)
-            ? `Bearer ${token}`
-            : `Bearer ${newToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const response = await aquaDevice.json();
+      const aquaDevice = await axiosContext.authAxios.get(`aqua-toppers/${id}`);
 
-      setAquaDevices(response);
+      setAquaDevices(aquaDevice.data);
 
-      setAquaDeviceWaterLevel(response.WaterLevelSensor);
-      setAquaDeviceHosePipe(response.HosePipeValve);
-      setAquaTopperKit(response.AquaTopperKit);
-      // console.log('-----dashboard------', response.AquaTopperKit);
-      setEditName(response.AquaTopperKit.Name);
-      setEditDescription(response.AquaTopperKit.Description);
-      setEditPostCode(response.AquaTopperKit.Postcode);
-      setAquaOpenConditionValue(response.OpenConditionValue);
-      setCloseConditionValue(response.CloseConditionValue);
+      setAquaDeviceWaterLevel(aquaDevice.data.WaterLevelSensor);
+      setAquaDeviceHosePipe(aquaDevice.data.HosePipeValve);
+      setAquaTopperKit(aquaDevice.data.AquaTopperKit);
+      setEditName(aquaDevice.data.AquaTopperKit.Name);
+      setEditDescription(aquaDevice.data.AquaTopperKit.Description);
+      setEditPostCode(aquaDevice.data.AquaTopperKit.Postcode);
+      setAquaOpenConditionValue(aquaDevice.data.OpenConditionValue);
+      setCloseConditionValue(aquaDevice.data.CloseConditionValue);
       setIsLoading(false);
     } catch (error) {
-      console.log(error);
+      console.log('u got an error', error);
       setIsLoading(false);
-    }
-  };
-
-  const s = JSON.stringify(aquaDeviceWaterLevel.Level);
-  const n = parseInt(s);
-
-
-  console.log('---rip', typeof n,n,aquaDeviceWaterLevel.Level);
-
-  const getRefreshToken = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    try {
-      const newRefreshTOken = await fetch(`${BASE_URL}/refresh-token`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(user).JwtToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const response = await newRefreshTOken.json();
-      // console.log('new token recevied', response);
-
-      setNewToken(response.JwtToken);
-    } catch (error) {
-      console.log(error);
     }
   };
 
   useEffect(() => {
     getAquaDevice();
-  }, [newToken]);
-
-  useEffect(() => {
-    getRefreshToken();
   }, []);
 
   //Show Modal
@@ -123,58 +84,45 @@ const PairedDevices = ({route}) => {
   const [editDescription, setEditDescription] = useState();
   const [editPostCode, setEditPostCode] = useState();
 
+
+ 
+
   const editAquaToper = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    const token = JSON.parse(user).JwtToken;
-    isTokenExpired(token);
+    console.log("first",id)
     setIsLoading(true);
-    axios
-      .put(
-        `${AQUATOOPER_BASE_URL}/${id}`,
-        {
-          PairedDeviceGroupId: id,
-          Name: editName,
-          Description: editDescription,
-          Postcode: editPostCode,
-        },
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: !isTokenExpired(token)
-              ? `Bearer ${token}`
-              : `Bearer ${newToken}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-      .then(res => {
-        console.log('ddddddddddd', res);
-        Toaster(`"edit successfully"`);
+    try {
+      await axiosContext.authAxios.get(`aqua-toppers/${id}`, {
+        PairedDeviceGroupId: id,
+        Name: editName,
+        Description: editDescription,
+        Postcode: editPostCode,
+      });
+      Toaster(`"edit successfully"`);
+      setIsLoading(false);
+      setShowModalTwo(false);
+      getAquaDevice();
+    } catch (e) {
+      if (e.aquaDevice.data?.status == 400) {
+        Toaster(`"please check your entry again"`);
         setIsLoading(false);
         setShowModalTwo(false);
-      })
-      .catch(e => {
-        if (e.response?.status == 400) {
-          Toaster(`"please check your entry again"`);
-          setIsLoading(false);
-          setShowModalTwo(false);
-        } else if (e.response?.status == 401) {
-          Toaster(`You are not authorised to make these changes`);
-          setIsLoading(false);
-          setShowModalTwo(false);
-        } else if (e.response?.status == 404) {
-          Toaster(`Device not found`);
-          setIsLoading(false);
-          setShowModalTwo(false);
-        } else if (e.response?.status == 500) {
-          Toaster(`Failed to update details`);
-          setIsLoading(false);
-          setShowModalTwo(false);
-        } else {
-          Toaster(`Some thing went wrong`);
-          setIsLoading(false);
-        }
-      });
+      } else if (e.aquaDevice.data?.status == 401) {
+        Toaster(`You are not authorised to make these changes`);
+        setIsLoading(false);
+        setShowModalTwo(false);
+      } else if (e.aquaDevice.data?.status == 404) {
+        Toaster(`Device not found`);
+        setIsLoading(false);
+        setShowModalTwo(false);
+      } else if (e.aquaDevice.data?.status == 500) {
+        Toaster(`Failed to update details`);
+        setIsLoading(false);
+        setShowModalTwo(false);
+      } else {
+        Toaster(`Some thing went wrong`);
+        setIsLoading(false);
+      }
+    }
   };
 
   // Aquatooper Settings
@@ -183,188 +131,106 @@ const PairedDevices = ({route}) => {
   const [rangeCloseValue, setRangeCloseValue] = useState();
 
   const openValue = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    const token = JSON.parse(user).JwtToken;
-    isTokenExpired(token);
     setIsLoading(true);
-    axios
-      .post(
-        `${AQUATOOPER_BASE_URL}/${id}/update-condition-value`,
+    try {
+      await axiosContext.authAxios.post(
+        `aqua-toppers/${id}/update-condition-value`,
         {
           ConditionValueId: aquaOpenConditionValue.ConditionValueId,
           Value: Math.floor(rangeOpenValue),
         },
-        {
-          method: 'POST',
-          headers: {
-            Authorization: !isTokenExpired(token)
-              ? `Bearer ${token}`
-              : `Bearer ${newToken}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-      .then(res => {
-        Toaster(`"value has been changed"`);
+      );
+      Toaster(`"value has been changed"`);
+      setIsLoading(false);
+      setShowModalThree(false);
+      getAquaDevice();
+    } catch (e) {
+      if (e.aquaDevice.data?.status == 400) {
+        Toaster(`"please check your entry again"`);
         setIsLoading(false);
-        setShowModalThree(false);
-        getAquaDevice();
-      })
-      .catch(e => {
-        if (e.response?.status == 400) {
-          // Toaster(`"please check your entry again"`);
-          setIsLoading(false);
-        } else if (e.response?.status == 401) {
-          Toaster(`You are not authorised to make these changes`);
-          setIsLoading(false);
-        } else if (e.response?.status == 404) {
-          Toaster(`Condition Value not found`);
-          setIsLoading(false);
-        } else if (e.response?.status == 500) {
-          Toaster(`Failed to update details`);
-          setIsLoading(false);
-        } else {
-          Toaster(`Some thing went wrong`);
-          setIsLoading(false);
-        }
-      });
+      } else if (e.aquaDevice.data?.status == 401) {
+        Toaster(`You are not authorised to make these changes`);
+        setIsLoading(false);
+      } else if (e.aquaDevice.data?.status == 404) {
+        Toaster(`Condition Value not found`);
+        setIsLoading(false);
+      } else if (e.aquaDevice.data?.status == 500) {
+        Toaster(`Failed to update details`);
+        setIsLoading(false);
+      } else {
+        Toaster(`Some thing went wrong`);
+        setIsLoading(false);
+      }
+    }
   };
 
   const closeValue = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    const token = JSON.parse(user).JwtToken;
-    isTokenExpired(token);
     setIsLoading(true);
-    axios
-      .post(
-        `${AQUATOOPER_BASE_URL}/${id}/update-condition-value`,
+    try {
+      await axiosContext.authAxios.post(
+        `aqua-toppers/${id}/update-condition-value`,
         {
           ConditionValueId: aquaCloseConditionValue.ConditionValueId,
           Value: Math.floor(rangeCloseValue),
         },
-        {
-          method: 'POST',
-          headers: {
-            Authorization: !isTokenExpired(token)
-              ? `Bearer ${token}`
-              : `Bearer ${newToken}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-      .then(res => {
-        // Toaster(`"value has been changed"`);
+      );
+      Toaster(`"value has been changed"`);
+      setIsLoading(false);
+      setShowModalThree(false);
+      getAquaDevice();
+    } catch (e) {
+      if (e.aquaDevice.data?.status == 400) {
+        Toaster(`"please check your entry again"`);
         setIsLoading(false);
-        setShowModalThree(false);
-        // getAquaDevice();
-      })
-      .catch(e => {
-        if (e.response?.status == 400) {
-          // Toaster(`"please check your entry again"`);
-          setIsLoading(false);
-        } else if (e.response?.status == 401) {
-          Toaster(`You are not authorised to make these changes`);
-          setIsLoading(false);
-        } else if (e.response?.status == 404) {
-          Toaster(`Condition Value not found`);
-          setIsLoading(false);
-        } else if (e.response?.status == 500) {
-          Toaster(`Failed to update details`);
-          setIsLoading(false);
-        } else {
-          Toaster(`Some thing went wrong`);
-          setIsLoading(false);
-        }
-      });
+      } else if (e.aquaDevice.data?.status == 401) {
+        Toaster(`You are not authorised to make these changes`);
+        setIsLoading(false);
+      } else if (e.aquaDevice.data?.status == 404) {
+        Toaster(`Condition Value not found`);
+        setIsLoading(false);
+      } else if (e.aquaDevice.data?.status == 500) {
+        Toaster(`Failed to update details`);
+        setIsLoading(false);
+      } else {
+        Toaster(`Some thing went wrong`);
+        setIsLoading(false);
+      }
+    }
   };
 
   // Automation Toggle
   const [isEnabled, setIsEnabled] = useState(Boolean);
-  const [toggle, setToggle] = useState(false);
-
   const automationOn = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    const token = JSON.parse(user).JwtToken;
-    isTokenExpired(token);
-    axios
-      .post(
-        `${AQUATOOPER_BASE_URL}/${id}/toggle-automation`,
+    try {
+      await axiosContext.authAxios.post(
+        `aqua-toppers/${id}/toggle-automation`,
         {
           Enabled: isEnabled == false ? true : false,
         },
-        {
-          method: 'POST',
-          headers: {
-            Authorization: !isTokenExpired(token)
-              ? `Bearer ${token}`
-              : `Bearer ${newToken}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-      .then(res => {
-        setIsEnabled(previousState => !previousState);
-        Toaster(`"The automation scenario has been toggled."`);
-      })
-      .catch(e => {
-        Toaster(`"error"${e}`);
-      });
-  };
-
-  const getToggleInfo = async () => {
-    const localStorageToggled = await AsyncStorage.getItem('toggle');
-    // console.log('status of toggle', JSON.stringify(localStorageToggled));
-
-    // If is not null
-    if (localStorageToggled) {
-      setToggle(localStorageToggled === 'true' ? true : false);
-    } else {
-      // If null set the localStorage key/value as a string.
-      AsyncStorage.setItem('toggle', `${toggle}`);
+      );
+      setIsEnabled(previousState => !previousState);
+      Toaster(`"The automation scenario has been toggled."`);
+    } catch (e) {
+      Toaster(`"error"${e}`);
     }
   };
 
-  useEffect(() => {
-    getToggleInfo();
-  }, []);
 
-  const handleToggle = async toggle => {
-    console.log('clicked');
-    await AsyncStorage.setItem('toggle', `${!toggle}`);
-    setToggle(toggle);
-  };
 
   // Keep Valve Closed
 
   const [isEnabledOne, setIsEnabledOne] = useState(Boolean);
 
   const kepValve = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    const token = JSON.parse(user).JwtToken;
-    isTokenExpired(token);
-    axios
-      .post(
-        `${AQUATOOPER_BASE_URL}/${id}/set-valve-state`,
-        {
-          DesiredValveState: !isEnabledOne == 1 ? 0 : 1,
-        },
-        {
-          method: 'POST',
-          headers: {
-            Authorization: !isTokenExpired(token)
-              ? `Bearer ${token}`
-              : `Bearer ${newToken}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-      .then(res => {
-        setIsEnabledOne(previousState => !previousState);
-        Toaster(`"The desired valve state has been updated."`);
-      })
-      .catch(e => {
-        Toaster(`error${e}`);
+    try {
+      await axiosContext.authAxios.post(`aqua-toppers/${id}/set-valve-state`, {
+        DesiredValveState: !isEnabledOne == 1 ? 0 : 1,
       });
+      setIsEnabledOne(previousState => !previousState);
+      Toaster(`"The desired valve state has been updated."`);
+    } catch (e) {
+      Toaster(`"error"${e}`);
+    }
   };
 
   return (
@@ -735,7 +601,7 @@ const PairedDevices = ({route}) => {
                 style={{fontSize: 24, color: '#0A4B87', textAlign: 'center'}}>
                 {aquaDeviceWaterLevel.Level === null
                   ? 0
-                  : aquaDeviceWaterLevel.Level}{' '}
+                  : aquaDeviceWaterLevel.Level}
                 %
               </Text>
               <View
@@ -747,40 +613,34 @@ const PairedDevices = ({route}) => {
                   alignItems: 'center',
                 }}>
                 {aquaDeviceWaterLevel.Level === null ? (
-                  <Wave
-                    style={styles.waveBall}
-                    H={aquaDeviceWaterLevel.Level === null ? 0 : 1}
-                    waveParams={[
-                      {A: 10, T: 180, fill: 'orange'},
-                      {A: 15, T: 140, fill: 'black'},
-                      {A: 20, T: 100, fill: 'red'},
-                    ]}
-                    animated={true}
-                  />
+                  <View>
+                    <Wave
+                      style={styles.waveBall}
+                      H={0}
+                      waveParams={[
+                        {A: 10, T: 180, fill: '#62c2ff'},
+                        {A: 15, T: 140, fill: '#0087dc'},
+                        {A: 20, T: 100, fill: '#1aa7ff'},
+                      ]}
+                      animated={true}
+                    />
+                  </View>
                 ) : (
-                  <Wave
-                    style={styles.waveBall}
-                    H={aquaDeviceWaterLevel.Level === null ? 0 : 75}
-                    waveParams={[
-                      {A: 10, T: 180, fill: '#62c2ff'},
-                      {A: 15, T: 140, fill: '#0087dc'},
-                      {A: 20, T: 100, fill: '#1aa7ff'},
-                    ]}
-                    animated={true}
-                  />
+                  <View>
+                    <Wave
+                      style={styles.waveBall}
+                      H={85}
+                      waveParams={[
+                        {A: 10, T: 180, fill: '#62c2ff'},
+                        {A: 15, T: 140, fill: '#0087dc'},
+                        {A: 20, T: 100, fill: '#1aa7ff'},
+                      ]}
+                      animated={true}
+                    />
+                  </View>
                 )}
               </View>
             </View>
-            {/* <View style={{marginTop: 20, alignSelf: 'center'}}>
-              <Image
-                source={require('../images/paired-1.png')}
-                style={styles.vectorOne}
-              />
-              <Image
-                source={require('../images/paired-2.png')}
-                style={styles.vectorTwo}
-              />
-            </View> */}
 
             <View
               style={{

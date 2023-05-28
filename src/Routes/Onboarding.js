@@ -1,34 +1,44 @@
 import {View, Text, ImageBackground, Image, StyleSheet} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useState, useContext, useCallback, useEffect} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import AppIntroSlider from 'react-native-app-intro-slider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
-import {
-  isLoggedIn,
-  setAuthTokens,
-  clearAuthTokens,
-  getAccessToken,
-  getRefreshToken,
-} from 'react-native-axios-jwt';
+import {AuthContext} from '../Helper/context/AuthContext';
+import * as Keychain from 'react-native-keychain';
 
 const Onboarding = () => {
   const navigation = useNavigation();
-  const [user, setUser] = useState({});
-  const getUserData = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    // const accessToken = await  getAccessToken();
-    // const refreshToken = await getRefreshToken();
-    // console.log(user,"user");
-    // console.log(refreshToken,"user");
-    setUser(user);
-    // setUser(accessToken);
-  };
-  useEffect(() => {
-    getUserData();
+  const authContext = useContext(AuthContext);
+  const [status, setStatus] = useState('loading');
+
+  const loadJWT = useCallback(async () => {
+    try {
+      const value = await Keychain.getGenericPassword();
+      const jwt = JSON.parse(value.password);
+      console.log(jwt)
+
+      authContext.setAuthState({
+        JwtToken: jwt.JwtToken || null,
+        Id: jwt.Id || null,
+        RefreshToken: jwt.RefreshToken || null,
+        authenticated: jwt.accessToken !== null,
+      });
+      // setStatus('success');
+    } catch (error) {
+      // setStatus('error');
+      console.log(`Keychain Error: ${error.message}`);
+      authContext.setAuthState({
+        JwtToken: null,
+        Id: null,
+        RefreshToken: null,
+        authenticated: false,
+      });
+    }
   }, []);
 
-  // console.log(user);
+  useEffect(() => {
+    loadJWT();
+  }, [loadJWT]);
 
   const slides = [
     {
@@ -90,12 +100,9 @@ const Onboarding = () => {
           renderSkipButton={() => buttonLabel('Skip')}
           renderDoneButton={() => buttonLabel('Done')}
           onDone={() => {
-            {
-              user == null
-                ? navigation.navigate('Login')
-                : navigation.navigate('Main');
-            }
-            // navigation.navigate('Login')
+            authContext?.authState?.authenticated === false
+              ? navigation.navigate('Login')
+              : navigation.navigate('Main');
           }}
           activeDotStyle={{
             backgroundColor: '#0A4B87',

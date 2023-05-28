@@ -7,122 +7,65 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect,useContext} from 'react';
 import {Dropdown} from 'react-native-element-dropdown';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BASE_URL} from '../Config';
 import Spinner from 'react-native-loading-spinner-overlay/lib';
-import axios from 'axios';
 import Toaster from '../Helper/Toaster';
-import {
-  isLoggedIn,
-  setAuthTokens,
-  clearAuthTokens,
-  getAccessToken,
-  getRefreshToken,
-} from 'react-native-axios-jwt';
-import {axiosInstance, requestRefresh} from '../utils/Api';
+
+import { AxiosContext } from '../Helper/context/AxiosContext';
+import { AuthContext } from '../Helper/context/AuthContext';
 
 const Profile = () => {
   const [personalData, setPersonalData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [newToken, setNewToken] = useState();
+  const axiosContext = useContext(AxiosContext);
+  const authContext = useContext(AuthContext);
 
-  // const getUserData = async () => {
-  //   const user = await AsyncStorage.getItem('userInfo');
-  //   setIsLoading(true);
-  //   const userProfile = await axiosInstance.get(
-  //     `${BASE_URL}/${JSON.parse(user).Id}`,
-  //     {requestRefresh},
-  //   );
-  //   const res = await userProfile.json();
-  //   console.log(res, 'user profile info');
-  // };
+  console.log(authContext)
+
 
   const getUserData = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    const token = JSON.parse(user).JwtToken;
     setIsLoading(true);
-    isTokenExpired(token);
+    const id = authContext.authState.Id;
     try {
-      const userProfile = await fetch(`${BASE_URL}/${JSON.parse(user).Id}`, {
-        headers: {
-          Authorization: !isTokenExpired(token)
-            ? `Bearer ${token}`
-            : `Bearer ${newToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const response = await userProfile.json();
+      const response = await axiosContext.authAxios.get(`/accounts/${id}`);
+      setPersonalData(response.data);
       setIsLoading(false);
-      setPersonalData(response);
-      // console.log('++++++++++++++++++++++++', response)
     } catch (error) {
       setIsLoading(false);
       console.log('Hello Error', error);
     }
   };
 
-  const getRefreshToken = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    try {
-      const newRefreshTOken = await fetch(`${BASE_URL}/refresh-token`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(user).JwtToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const response = await newRefreshTOken.json();
-      // console.log('new token recevied', response);
-
-      setNewToken(response.JwtToken);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const logoutUser = async () => {
     try {
-      await AsyncStorage.removeItem('userInfo');
-      // clearAuthTokens();
+      authContext.logout();
       navigation.navigate('Login');
     } catch (error) {
       console.log(error);
     }
   };
 
+
   const deleteUser = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-
     try {
-      const userProfile = await fetch(`${BASE_URL}/${JSON.parse(user).Id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(user).JwtToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
+      const userProfile = await axiosContext.authAxios.delete(`/accounts/${id}`);
       const response = await userProfile.json();
       Toaster(`"account successfully deleted"`);
       navigation.navigate('Register');
     } catch (error) {
       console.log('Hello Error', error);
     }
-  };
+  }; 
 
-  useEffect(() => {
-    getRefreshToken();
-  }, []);
+
+
 
   useEffect(() => {
     getUserData();
-  }, [newToken]);
+  }, []);
 
   const navigation = useNavigation();
   const [value, setValue] = useState(null);
