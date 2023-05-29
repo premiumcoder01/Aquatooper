@@ -23,7 +23,7 @@ const Profile = () => {
   const axiosContext = useContext(AxiosContext);
   const authContext = useContext(AuthContext);
 
-  console.log(authContext)
+  // console.log(authContext)
 
 
   const getUserData = async () => {

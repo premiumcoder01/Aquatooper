@@ -9,6 +9,7 @@ import RegisterConfirmation from './Auth/RegisterConfirmation';
 import RegisterAquaTooper from './Screens/RegisterAquaTooper';
 import HowWeUseYourData from './Screens/HowWeUseYourData';
 import Main from './Routes/Main';
+import MainTab from './Routes/MainTab';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 
@@ -34,6 +35,7 @@ const MainAuth = () => {
         />
         <Stack.Screen name="HowDoWeUseYourData" component={HowWeUseYourData} />
         <Stack.Screen name="Main" component={Main} />
+        <Stack.Screen name="MainTab" component={MainTab} />
       </Stack.Navigator>
     </NavigationContainer>
   );

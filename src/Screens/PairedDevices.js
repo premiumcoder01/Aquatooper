@@ -69,6 +69,13 @@ const PairedDevices = ({route}) => {
     }
   };
 
+  console.log(
+    typeof aquaDeviceWaterLevel.Level,
+    aquaDeviceWaterLevel.Level,
+    conversion(aquaDeviceWaterLevel.Level),
+    aquaDeviceWaterLevel,
+  );
+
   useEffect(() => {
     getAquaDevice();
   }, []);
@@ -84,11 +91,8 @@ const PairedDevices = ({route}) => {
   const [editDescription, setEditDescription] = useState();
   const [editPostCode, setEditPostCode] = useState();
 
-
- 
-
   const editAquaToper = async () => {
-    console.log("first",id)
+    console.log('first', id);
     setIsLoading(true);
     try {
       await axiosContext.authAxios.get(`aqua-toppers/${id}`, {
@@ -214,8 +218,6 @@ const PairedDevices = ({route}) => {
       Toaster(`"error"${e}`);
     }
   };
-
-
 
   // Keep Valve Closed
 
@@ -612,7 +614,23 @@ const PairedDevices = ({route}) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                {aquaDeviceWaterLevel.Level === null ? (
+                {aquaDevice && aquaDeviceWaterLevel.Level === null ? (
+                  <Text>wait</Text>
+                ) : (
+                  <View>
+                    <Wave
+                      style={styles.waveBall}
+                      H={85}
+                      waveParams={[
+                        {A: 10, T: 180, fill: '#62c2ff'},
+                        {A: 15, T: 140, fill: '#0087dc'},
+                        {A: 20, T: 100, fill: '#1aa7ff'},
+                      ]}
+                      animated={true}
+                    />
+                  </View>
+                )}
+                {/* {aquaDeviceWaterLevel.Level === null ? (
                   <View>
                     <Wave
                       style={styles.waveBall}
@@ -638,7 +656,7 @@ const PairedDevices = ({route}) => {
                       animated={true}
                     />
                   </View>
-                )}
+                )} */}
               </View>
             </View>
 

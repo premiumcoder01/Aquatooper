@@ -1894,6 +1894,18 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/d3-path@*":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/d3-path/-/d3-path-3.0.0.tgz#939e3a784ae4f80b1fde8098b91af1776ff1312b"
+  integrity sha512-0g/A+mZXgFkQxN3HniRDbXMN79K3CdTpLsevj+PXiTcb2hVyvkZUBg37StmgCQkaD84cUJ4uaDAWq7UJOQy2Tg==
+
+"@types/d3-shape@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@types/d3-shape/-/d3-shape-3.1.1.tgz#15cc497751dac31192d7aef4e67a8d2c62354b95"
+  integrity sha512-6Uh86YFF7LGg4PQkuO2oG6EMBRLuW9cbavUW46zkIO5kuS2PfTqo2o9SkgtQzguBHbLgNnU90UNsITpsX1My+A==
+  dependencies:
+    "@types/d3-path" "*"
+
 "@types/graceful-fs@^4.1.3":
   version "4.1.6"
   resolved "https://registry.yarnpkg.com/@types/graceful-fs/-/graceful-fs-4.1.6.tgz#e14b2576a1c25026b7f02ede1de3b84c3a1efeae"
@@ -2998,6 +3010,18 @@ csstype@^3.0.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.2.tgz#1d4bf9d572f11c14031f0436e1c10bc1f571f50b"
   integrity sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==
+
+d3-path@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/d3-path/-/d3-path-3.1.0.tgz#22df939032fb5a71ae8b1800d61ddb7851c42526"
+  integrity sha512-p3KP5HCf/bvjBSSKuXid6Zqijx7wIfNW+J/maPs+iwR35at5JCbLUT0LzF1cnjbCHWhqzQTIN2Jpe8pRebIEFQ==
+
+d3-shape@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/d3-shape/-/d3-shape-3.2.0.tgz#a1a839cbd9ba45f28674c69d7f855bcf91dfc6a5"
+  integrity sha512-SaLBuwGm3MOViRq2ABk3eLoxwZELpH6zhl3FbAoJ7Vm1gofKx6El1Ib5z23NUEhF9AsGl7y+dzLe5Cw2AArGTA==
+  dependencies:
+    d3-path "^3.1.0"
 
 dayjs@^1.8.15:
   version "1.11.7"
@@ -6267,6 +6291,14 @@ react-native-codegen@^0.71.5:
     jscodeshift "^0.13.1"
     nullthrows "^1.1.1"
 
+react-native-curved-bottom-bar@^3.2.6:
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/react-native-curved-bottom-bar/-/react-native-curved-bottom-bar-3.2.6.tgz#6304b4aaad2262ec39ee63ef8af39095ffe71e57"
+  integrity sha512-o7LdGACt/KdL+kRoGdcXSRYrCxI6L/cHzeNA8OhfBYl//eh087N14dF/Cvoz/JN7YPUtrM5Xwdm4tuSI8PzNKQ==
+  dependencies:
+    d3-shape "^3.2.0"
+    react-native-size-scaling "^0.5.1"
+
 react-native-element-dropdown@^2.9.0:
   version "2.9.0"
   resolved "https://registry.yarnpkg.com/react-native-element-dropdown/-/react-native-element-dropdown-2.9.0.tgz#c218ab512bd8be69fa0ac70462293863f8cfd527"
@@ -6354,6 +6386,11 @@ react-native-select-dropdown@^3.3.2:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/react-native-select-dropdown/-/react-native-select-dropdown-3.3.3.tgz#ecf240dd0d968f754522cdbf6f839c3c08e54114"
   integrity sha512-mkekhWwe4EGk5d5jZ5ZdmPF5q87lkl3sZeO4Kojb+J8fBeYJS/zVcYeECqiBPBL3nZ4x/FEOAZlP8lbn3l2ptw==
+
+react-native-size-scaling@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/react-native-size-scaling/-/react-native-size-scaling-0.5.1.tgz#a1a7f91905e11fc6bba0a5178dc308aca7a76ec8"
+  integrity sha512-OVRox11fjpwUR7DQIPH/4RAhwkqm/r7lKYl5w0dEogFZ3Rz9CK7Bua7oaPLmVP2QnWP0rc0bpgkMc/Rl8ik1yw==
 
 react-native-slider@^0.11.0:
   version "0.11.0"
