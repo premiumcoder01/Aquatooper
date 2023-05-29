@@ -32,31 +32,7 @@ const Login = () => {
   const [password, setPassword] = useState('adonis1972');
   const [rememberMe, setRememberMe] = useState(true);
 
-  // const loginUser = async (username, password, rememberMe) => {
-  //   setIsLoading(true);
-  //   const response = await axiosInstance.post('/authenticate', {
-  //     username,
-  //     password,
-  //     rememberMe,
-  //   });
 
-  //   let res = response.data;
-  //   AsyncStorage.setItem('userInfo', JSON.stringify(res));
-  //   console.log(res.Username, 'user data');
-  //   setIsLoading(false);
-
-  //   await setAuthTokens({
-  //     accessToken: res.JwtToken,
-  //     refreshToken: res.RefreshToken,
-  //   });
-  //   navigation.navigate('Main');
-
-  //   if (!res) {
-  //     Toaster(`"enter the correct username and password"`);
-  //     console.log('enter the correct username and password');
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const loginUser = (username, password, rememberMe) => {
     setIsLoading(true);

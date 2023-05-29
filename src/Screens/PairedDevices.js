@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Modal,
   BlurView,
+  SafeAreaView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 
@@ -81,8 +82,7 @@ const PairedDevices = ({route}) => {
   const s = JSON.stringify(aquaDeviceWaterLevel.Level);
   const n = parseInt(s);
 
-
-  console.log('---rip', typeof n,n,aquaDeviceWaterLevel.Level);
+  console.log('---rip', typeof n, n, aquaDeviceWaterLevel.Level);
 
   const getRefreshToken = async () => {
     const user = await AsyncStorage.getItem('userInfo');
@@ -368,7 +368,7 @@ const PairedDevices = ({route}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Spinner visible={isLoading} color="#0a4b87" />
       <ImageBackground
         source={require('../images/home.png')}
@@ -916,7 +916,7 @@ const PairedDevices = ({route}) => {
           </LinearGradient>
         </ScrollView>
       </ImageBackground>
-    </View>
+    </SafeAreaView>
   );
 };
 
