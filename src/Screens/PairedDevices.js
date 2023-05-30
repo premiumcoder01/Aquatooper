@@ -2,11 +2,9 @@ import {
   StyleSheet,
   Text,
   View,
-  Animated,
   ImageBackground,
   ScrollView,
   TextInput,
-  Image,
   TouchableOpacity,
   Modal,
   BlurView,
@@ -51,9 +49,7 @@ const PairedDevices = ({route}) => {
     setIsLoading(true);
     try {
       const aquaDevice = await axiosContext.authAxios.get(`aqua-toppers/${id}`);
-
       setAquaDevices(aquaDevice.data);
-
       setAquaDeviceWaterLevel(aquaDevice.data.WaterLevelSensor);
       setAquaDeviceHosePipe(aquaDevice.data.HosePipeValve);
       setAquaTopperKit(aquaDevice.data.AquaTopperKit);
@@ -615,12 +611,23 @@ const PairedDevices = ({route}) => {
                   alignItems: 'center',
                 }}>
                 {aquaDevice && aquaDeviceWaterLevel.Level === null ? (
-                  <Text>wait</Text>
+                  <View>
+                    <Wave
+                      style={styles.waveBall}
+                      H={aquaDevice ? 0 : 24}
+                      waveParams={[
+                        {A: 10, T: 180, fill: '#62c2ff'},
+                        {A: 15, T: 140, fill: '#0087dc'},
+                        {A: 20, T: 100, fill: '#1aa7ff'},
+                      ]}
+                      animated={true}
+                    />
+                  </View>
                 ) : (
                   <View>
                     <Wave
                       style={styles.waveBall}
-                      H={85}
+                      H={aquaDevice ? 0 : 10}
                       waveParams={[
                         {A: 10, T: 180, fill: '#62c2ff'},
                         {A: 15, T: 140, fill: '#0087dc'},

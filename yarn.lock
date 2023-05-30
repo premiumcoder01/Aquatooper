@@ -6267,6 +6267,11 @@ react-native-app-intro-slider@^4.0.4:
   resolved "https://registry.yarnpkg.com/react-native-app-intro-slider/-/react-native-app-intro-slider-4.0.4.tgz#fa5cda7057db62c448ac975ffd2ba0cff94cc8d8"
   integrity sha512-Zkjaol6X3BbZkHUpVDj2LjdidpS6rCgKi0fx80xgGKa0pHxBRd4swWTv2bHnnvu5k1/HXwYk0mY2TbK+2jHl5w==
 
+react-native-art-wave@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-art-wave/-/react-native-art-wave-1.0.3.tgz#941fc714fbb6014cbdea3592fde0e8ead528ed7d"
+  integrity sha512-a7WXv50a3D3z8uqCG7h8ifFhhhHtRF5i3gf117pAOQjex5/I0CCc5eRQRcfoLLW2IHdu3g+3qgFHpsRw+gpxWg==
+
 react-native-axios-jwt@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/react-native-axios-jwt/-/react-native-axios-jwt-1.8.0.tgz#fc1bf083fafc1be0c71c2df9da36c1b048e56aa8"
