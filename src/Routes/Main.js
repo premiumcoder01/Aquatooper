@@ -46,20 +46,23 @@ const Main = () => {
           headerShown: false,
 
           tabBarIcon: () => (
-            <View>
+            <View
+              style={{
+                borderRadius: 50,
+                backgroundColor: '#fff',
+                fontSize: 25,
+                justifyContent:"center",
+                alignSelf: 'center',
+                marginTop: -65,
+                height: 65,
+                width: 65,
+              }}>
               <AntDesign
                 name="plus"
                 style={{
                   color: '#0A4B87',
-                  fontSize: 25,
-                  alignSelf: 'center',
-                  marginTop: -65,
-                  backgroundColor: '#fff',
-                  height: 65,
-                  width: 65,
-                  borderRadius: 50,
-                  paddingTop: 19,
-                  paddingLeft: 19,
+                  fontSize:30,
+                  textAlign:"center",
                 }}
               />
             </View>

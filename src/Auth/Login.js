@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   ImageBackground,
   StyleSheet,
@@ -7,22 +8,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Spinner from 'react-native-loading-spinner-overlay/lib';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BASE_URL} from '../Config';
-import axios from 'axios';
 import Toaster from '../Helper/Toaster';
-import {axiosInstance} from '../utils/Api';
-import {
-  isLoggedIn,
-  setAuthTokens,
-  clearAuthTokens,
-  getAccessToken,
-  getRefreshToken,
-} from 'react-native-axios-jwt';
+import {AuthContext} from '../Helper/context/AuthContext';
+import {AxiosContext} from '../Helper/context/AxiosContext';
+import * as Keychain from 'react-native-keychain';
 
 const Login = () => {
   const navigation = useNavigation();
@@ -32,28 +25,44 @@ const Login = () => {
   const [password, setPassword] = useState('adonis1972');
   const [rememberMe, setRememberMe] = useState(true);
 
+  const authContext = useContext(AuthContext);
+  const {authAxios} = useContext(AxiosContext);
 
-
-  const loginUser = (username, password, rememberMe) => {
+  const loginUser = async () => {
     setIsLoading(true);
-    axios
-      .post(`${BASE_URL}/authenticate`, {
+    try {
+      const response = await authAxios.post('/accounts/authenticate', {
         username,
         password,
         rememberMe,
-      })
-      .then(res => {
-        let userInfo = res.data;
-        AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-        setIsLoading(false);
-        // console.log('+-----------', userInfo);
-        navigation.navigate('Main');
-      })
-      .catch(e => {
-        Toaster(`"enter the correct username and password"`);
-        setIsLoading(false);
       });
+
+      const {JwtToken, RefreshToken,Id} = response.data;
+      authContext.setAuthState({
+        JwtToken,
+        Id,
+        RefreshToken,
+        authenticated: true,
+      });
+
+      await Keychain.setGenericPassword(
+        'token',
+        JSON.stringify({
+          JwtToken,
+          Id,
+          RefreshToken,
+        }),
+      );
+      setIsLoading(false);
+      navigation.navigate('Main');
+    } catch (error) {
+      Alert.alert('Login Failed', error.response.data.message);
+      Toaster(`"enter the correct username and password"`);
+      setIsLoading(false);
+    }
   };
+
+
 
   return (
     <View style={styles.container}>
@@ -119,7 +128,7 @@ const Login = () => {
               } else if (!password) {
                 Toaster(`"enter the password"`);
               } else {
-                loginUser(username, password, rememberMe);
+                loginUser();
               }
             }}>
             <Text style={{textAlign: 'center', color: '#fff'}}>Log In </Text>

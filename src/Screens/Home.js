@@ -8,7 +8,7 @@ import {
   View,
   FlatList,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {AQUATOOPER_BASE_URL, BASE_URL} from '../Config';
@@ -16,6 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay/lib';
 import isTokenExpired from '../Helper/isTokenExpired';
 import Wave from 'react-native-waveview';
+import {AxiosContext} from '../Helper/context/AxiosContext';
+import {AuthContext} from '../Helper/context/AuthContext';
 
 const Home = () => {
   const [value, setValue] = useState(0.6);
@@ -23,59 +25,28 @@ const Home = () => {
   const [poolValue, setPoolValue] = useState();
   const [newToken, setNewToken] = useState();
 
+  const axiosContext = useContext(AxiosContext);
+  const authContext = useContext(AuthContext);
+
   const isFocused = useIsFocused();
 
   const getAquaToopers = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    const token = JSON.parse(user).JwtToken;
     setIsLoading(true);
-    isTokenExpired(token);
     try {
-      const aquaTopper = await fetch(`${AQUATOOPER_BASE_URL}`, {
-        method: 'GET',
-        headers: {
-          Authorization: !isTokenExpired(token)
-            ? `Bearer ${token}`
-            : `Bearer ${newToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const response = await aquaTopper.json();
-      setPoolValue(response.DashboardCards);
+      const response = await axiosContext.authAxios.get('/aqua-toppers');
+      setPoolValue(response.data.DashboardCards);
       setIsLoading(false);
-      // console.log('new responces', response);
     } catch (error) {
       setIsLoading(false);
-      console.log(error);
-    }
-  };
-  const getRefreshToken = async () => {
-    const user = await AsyncStorage.getItem('userInfo');
-    try {
-      const newRefreshTOken = await fetch(`${BASE_URL}/refresh-token`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${JSON.parse(user).JwtToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const response = await newRefreshTOken.json();
-      // console.log('new token recevied', response);
-
-      setNewToken(response.JwtToken);
-    } catch (error) {
-      console.log(error);
+      console.log('u got an error', error);
     }
   };
 
-  useEffect(() => {
-    getRefreshToken();
-  }, []);
+  console.log(poolValue)
 
   useEffect(() => {
     getAquaToopers();
-  }, [newToken, isFocused]);
+  }, [isFocused]);
 
   const navigation = useNavigation();
 
