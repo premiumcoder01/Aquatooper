@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Modal,
   BlurView,
+  Pressable,
 } from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
 
@@ -69,14 +70,28 @@ const PairedDevices = ({route}) => {
     typeof aquaDeviceWaterLevel.Level,
     aquaDeviceWaterLevel.Level,
     conversion(aquaDeviceWaterLevel.Level),
-    aquaDeviceWaterLevel,
   );
 
   useEffect(() => {
     getAquaDevice();
+    setTimeout(() => {
+     aquaDeviceWaterLevel.Level == 'NaN'
+        ? console.log('not a number')
+        : console.log('yes it is a number');
+      // set water baseline height
+      this._waveRect && this._waveRect.setWaterHeight(76);
+
+      // reset wave effect
+      this._waveRect &&
+        this._waveRect.setWaveParams([
+          {A: 10, T: 180, fill: '#62c2ff'},
+          {A: 15, T: 140, fill: '#0087dc'},
+          {A: 20, T: 100, fill: '#1aa7ff'},
+        ]);
+    }, 5000);
   }, []);
 
-  //Show Modal
+  //Show Modal  
   const [showModalOne, setShowModalOne] = useState(false);
   const [showModalTwo, setShowModalTwo] = useState(false);
   const [showModalThree, setShowModalThree] = useState(false);
@@ -610,42 +625,15 @@ const PairedDevices = ({route}) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                {aquaDevice && aquaDeviceWaterLevel.Level === null ? (
-                  <View>
-                    <Wave
-                      style={styles.waveBall}
-                      H={aquaDevice ? 0 : 24}
-                      waveParams={[
-                        {A: 10, T: 180, fill: '#62c2ff'},
-                        {A: 15, T: 140, fill: '#0087dc'},
-                        {A: 20, T: 100, fill: '#1aa7ff'},
-                      ]}
-                      animated={true}
-                    />
-                  </View>
-                ) : (
-                  <View>
-                    <Wave
-                      style={styles.waveBall}
-                      H={aquaDevice ? 0 : 10}
-                      waveParams={[
-                        {A: 10, T: 180, fill: '#62c2ff'},
-                        {A: 15, T: 140, fill: '#0087dc'},
-                        {A: 20, T: 100, fill: '#1aa7ff'},
-                      ]}
-                      animated={true}
-                    />
-                  </View>
-                )}
                 {/* {aquaDeviceWaterLevel.Level === null ? (
                   <View>
                     <Wave
                       style={styles.waveBall}
                       H={0}
                       waveParams={[
-                        {A: 10, T: 180, fill: '#62c2ff'},
-                        {A: 15, T: 140, fill: '#0087dc'},
-                        {A: 20, T: 100, fill: '#1aa7ff'},
+                        {A: 10, T: 180, fill: '#FF9F2E'},
+                        {A: 15, T: 140, fill: '#F08200'},
+                        {A: 20, T: 100, fill: '#B36100'},
                       ]}
                       animated={true}
                     />
@@ -654,7 +642,7 @@ const PairedDevices = ({route}) => {
                   <View>
                     <Wave
                       style={styles.waveBall}
-                      H={85}
+                      H={aquaDeviceWaterLevel.Level !== null ? 86 : 0}
                       waveParams={[
                         {A: 10, T: 180, fill: '#62c2ff'},
                         {A: 15, T: 140, fill: '#0087dc'},
@@ -664,6 +652,20 @@ const PairedDevices = ({route}) => {
                     />
                   </View>
                 )} */}
+
+                <View>
+                  <Wave
+                    ref={ref => (this._waveRect = ref)}
+                    style={styles.waveBall}
+                    H={30}
+                    waveParams={[
+                      {A: 10, T: 180, fill: '#62c2ff'},
+                      {A: 15, T: 140, fill: '#0087dc'},
+                      {A: 20, T: 100, fill: '#1aa7ff'},
+                    ]}
+                    animated={true}
+                  />
+                </View>
               </View>
             </View>
 
@@ -811,6 +813,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  wcontainer: {},
   waveBall: {
     width: 100,
     aspectRatio: 1,
